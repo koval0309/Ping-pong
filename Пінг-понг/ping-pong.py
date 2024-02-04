@@ -1,14 +1,14 @@
 from pygame import *
-from random import randint
 
 win_width = 700
 win_height = 500
 
-font.init()
-font2 = font.Font(None, 36)
-font1 = font.Font(None, 80)
-win = font1.render("YOU WIN", True, (255, 255, 255))
-lose = font1.render("YOU LOSE", True, (180, 0, 0))
+speed_x = 3
+speed_y = 3
+
+img_truba1 = "Truba1.png"
+img_truba2 = "Truba2.png"
+img_ball = "boll.png"
 
 
 class GameSprite(sprite.Sprite):
@@ -24,32 +24,56 @@ class GameSprite(sprite.Sprite):
     def reset(self):
         window.blit(self.image, (self.rect.x, self.rect.y))
 
+class Player1(GameSprite): 
+    def update(self): 
+        keys = key.get_pressed() 
+        if keys[K_w] and self.rect.y > 5: 
+            self.rect.y -= self.speed 
+        if keys[K_s] and self.rect.y < win_height - 100: 
+            self.rect.y += self.speed 
+class Player2(GameSprite): 
+    def update(self): 
+        keys = key.get_pressed() 
+        if keys[K_UP] and self.rect.y > 5: 
+            self.rect.y -= self.speed 
+        if keys[K_DOWN] and self.rect.y < win_height - 100: 
+            self.rect.y += self.speed
 
-class Player(GameSprite):
-    def right(self):
-        keys = key.get_pressed()
-        if keys[K_UP] and self.rect.y > 5:
-            self.rect.y += self.rect.y
-        if keys [K_d] and self.rect.x < win_height - 80:
-            self.rect.y -= self.rect.y
-
-    def left(self):
-        keys = key.get_pressed()
-        if keys[K_w] and self.rect.y > 5:
-            self.rect.y += self.rect.y
-        if keys [K_s] and self.rect.y < win_height - 80:
-            self.rect.y -= self.rect.y
 
 display.set_caption("Пінг-Понг")
 window = display.set_mode((win_width, win_height))
 background = (75, 156, 98)
 window.fill(background)
 
+raketka_left = Player1(img_truba1, 50, 350, 70, 100, 5 )
+raketka_right = Player2(img_truba1, 570, 50, 70, 100, 5 )
+ball = GameSprite(img_ball, 200, 200, 50, 50, 20)
+
 finish = False
-
+clock = time.Clock()
+FPS = 60
 run = True
+
 while run:
+    for e in event.get():
+        if e.type == QUIT:
+            run = False
 
-    display.update()
+    if not finish:
+        window.fill(background)
+        raketka_left.update()
+        raketka_right.update()
+        ball.update()
+        raketka_right.reset()
+        ball.reset()
+        raketka_left.reset()
+        ball.rect.x += speed_x
+        ball.rect.y += speed_y
 
-    time.delay(50)
+    if ball.rect.y > win_height-50 or ball.rect.y < 0:
+        speed_y *= -1
+    if sprite.collide_rect(img_truba1, ball) or sprite.collide_rect(img_truba2, ball):
+        speed_x *= -1
+        display.update()
+
+    clock.tick(FPS)
